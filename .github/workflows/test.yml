@@ -36,11 +36,11 @@ jobs:
   # used by testtar/test9p, for the same reason it is used there: no method name
   # is a substring of another method name or of any arch key in the map.
   testsshfs:
-    if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'sshfs') }}
+    if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'sshfs') }}
     strategy:
       fail-fast: false
       matrix:
-        release: [ "6.4.0", "6.4.1","6.4.2"
+        release: [ "26.7"
 , ""]
         arch: [ "aarch64", "", "riscv64", "powerpc64", "sparc64", "ppc64le", "s390x", "i386", "loongarch64", "armv7"]
         runs: [ "ubuntu-24.04", "ubuntu-24.04-arm"]
@@ -64,59 +64,23 @@ jobs:
           - runs: "ubuntu-24.04-arm"
             arch: "armv7"
           # Manual matrix excludes only; combos with no conf are auto-excluded.
-          - release: "6.4.0"
+          - release: "26.7"
             arch: aarch64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: riscv64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: powerpc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: sparc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: ppc64le
-          - release: "6.4.0"
+          - release: "26.7"
             arch: s390x
-          - release: "6.4.0"
+          - release: "26.7"
             arch: i386
-          - release: "6.4.0"
+          - release: "26.7"
             arch: loongarch64
-          - release: "6.4.0"
-            arch: armv7
-          - release: "6.4.1"
-            arch: aarch64
-          - release: "6.4.1"
-            arch: riscv64
-          - release: "6.4.1"
-            arch: powerpc64
-          - release: "6.4.1"
-            arch: sparc64
-          - release: "6.4.1"
-            arch: ppc64le
-          - release: "6.4.1"
-            arch: s390x
-          - release: "6.4.1"
-            arch: i386
-          - release: "6.4.1"
-            arch: loongarch64
-          - release: "6.4.1"
-            arch: armv7
-          - release: "6.4.2"
-            arch: aarch64
-          - release: "6.4.2"
-            arch: riscv64
-          - release: "6.4.2"
-            arch: powerpc64
-          - release: "6.4.2"
-            arch: sparc64
-          - release: "6.4.2"
-            arch: ppc64le
-          - release: "6.4.2"
-            arch: s390x
-          - release: "6.4.2"
-            arch: i386
-          - release: "6.4.2"
-            arch: loongarch64
-          - release: "6.4.2"
+          - release: "26.7"
             arch: armv7
           - release: ""
             arch: aarch64
@@ -136,18 +100,14 @@ jobs:
             arch: loongarch64
           - release: ""
             arch: armv7
-          - release: "6.4.0"
-            arch: ""
-          - release: "6.4.1"
-            arch: ""
-          - release: "6.4.2"
+          - release: "26.7"
             arch: ""
           - release: ""
             arch: ""
 
 
     runs-on: ${{ matrix.runs }}
-    name: sshfs DragonflyBSD
+    name: sshfs OPNsense
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
@@ -156,17 +116,17 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 #    - name: Creating Web console
-#      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'sshfs') }}
+#      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'sshfs') }}
 #      uses: vmactions/cf-tunnel@v0
 #      id: tunnel
 #      with:
 #        protocol: http
 #        port: 8000
 
-    - name: Test in DragonflyBSD
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'sshfs') }}
+    - name: Test in OPNsense
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'sshfs') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         envs: 'DEBUG MYTOKEN MYTOKEN2'
         prepare: |
@@ -196,10 +156,12 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
 
+
     - name: Test NAT
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'sshfs') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'sshfs') }}
       env:
         VM_USER: ""
       run: |
@@ -208,8 +170,8 @@ jobs:
         [ "$TEST_ENV" = "abc" ]
         ssh -v -p 20022 ${VM_USER:-root}@localhost  "uname -a;whoami;pwd"
     - name: Test custom shell
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'sshfs') }}
-      shell: dragonflybsd {0}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'sshfs') }}
+      shell: opnsense {0}
       run: |
         pwd
           pwd
@@ -217,7 +179,9 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
+
     - name: Collect VM debug artifacts
       if: failure()
       run: |
@@ -247,11 +211,11 @@ jobs:
 
   # Two-level sync gating -- see the comment above testsshfs.
   testnfs:
-    if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'nfs') }}
+    if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'nfs') }}
     strategy:
       fail-fast: false
       matrix:
-        release: [ "6.4.0", "6.4.1","6.4.2"
+        release: [ "26.7"
 , ""]
         arch: [ "aarch64", "", "riscv64", "powerpc64", "sparc64", "ppc64le", "s390x", "i386", "loongarch64", "armv7"]
         runs: [ "ubuntu-24.04", "ubuntu-24.04-arm"]
@@ -275,59 +239,23 @@ jobs:
           - runs: "ubuntu-24.04-arm"
             arch: "armv7"
           # Manual matrix excludes only; combos with no conf are auto-excluded.
-          - release: "6.4.0"
+          - release: "26.7"
             arch: aarch64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: riscv64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: powerpc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: sparc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: ppc64le
-          - release: "6.4.0"
+          - release: "26.7"
             arch: s390x
-          - release: "6.4.0"
+          - release: "26.7"
             arch: i386
-          - release: "6.4.0"
+          - release: "26.7"
             arch: loongarch64
-          - release: "6.4.0"
-            arch: armv7
-          - release: "6.4.1"
-            arch: aarch64
-          - release: "6.4.1"
-            arch: riscv64
-          - release: "6.4.1"
-            arch: powerpc64
-          - release: "6.4.1"
-            arch: sparc64
-          - release: "6.4.1"
-            arch: ppc64le
-          - release: "6.4.1"
-            arch: s390x
-          - release: "6.4.1"
-            arch: i386
-          - release: "6.4.1"
-            arch: loongarch64
-          - release: "6.4.1"
-            arch: armv7
-          - release: "6.4.2"
-            arch: aarch64
-          - release: "6.4.2"
-            arch: riscv64
-          - release: "6.4.2"
-            arch: powerpc64
-          - release: "6.4.2"
-            arch: sparc64
-          - release: "6.4.2"
-            arch: ppc64le
-          - release: "6.4.2"
-            arch: s390x
-          - release: "6.4.2"
-            arch: i386
-          - release: "6.4.2"
-            arch: loongarch64
-          - release: "6.4.2"
+          - release: "26.7"
             arch: armv7
           - release: ""
             arch: aarch64
@@ -350,7 +278,7 @@ jobs:
 
 
     runs-on: ${{ matrix.runs }}
-    name: nfs DragonflyBSD
+    name: nfs OPNsense
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
@@ -358,10 +286,10 @@ jobs:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
     - uses: actions/checkout@v7
-    - name: Test in DragonflyBSD
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'nfs') }}
+    - name: Test in OPNsense
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'nfs') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         envs: 'DEBUG MYTOKEN MYTOKEN2'
         prepare: |
@@ -391,10 +319,12 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
 
+
     - name: Test NAT
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'nfs') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'nfs') }}
       env:
         VM_USER: ""
       run: |
@@ -406,8 +336,8 @@ jobs:
         [ "$TEST_ENV" = "abc" ]
         ssh -v -p 20022 ${VM_USER:-root}@localhost "uname -a;whoami;pwd"
     - name: Test custom shell
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'nfs') }}
-      shell: dragonflybsd {0}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'nfs') }}
+      shell: opnsense {0}
       run: |
         pwd
           pwd
@@ -415,7 +345,9 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
+
     - name: Collect VM debug artifacts
       if: failure()
       run: |
@@ -443,11 +375,11 @@ jobs:
 
   # Two-level sync gating -- see the comment above testsshfs.
   testscp:
-    if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'scp') }}
+    if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'scp') }}
     strategy:
       fail-fast: false
       matrix:
-        release: [ "6.4.0", "6.4.1","6.4.2"
+        release: [ "26.7"
 , ""]
         arch: [ "aarch64", "", "riscv64", "powerpc64", "sparc64", "ppc64le", "s390x", "i386", "loongarch64", "armv7"]
         runs: [ "ubuntu-24.04", "ubuntu-24.04-arm"]
@@ -471,59 +403,23 @@ jobs:
           - runs: "ubuntu-24.04-arm"
             arch: "armv7"
           # Manual matrix excludes only; combos with no conf are auto-excluded.
-          - release: "6.4.0"
+          - release: "26.7"
             arch: aarch64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: riscv64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: powerpc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: sparc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: ppc64le
-          - release: "6.4.0"
+          - release: "26.7"
             arch: s390x
-          - release: "6.4.0"
+          - release: "26.7"
             arch: i386
-          - release: "6.4.0"
+          - release: "26.7"
             arch: loongarch64
-          - release: "6.4.0"
-            arch: armv7
-          - release: "6.4.1"
-            arch: aarch64
-          - release: "6.4.1"
-            arch: riscv64
-          - release: "6.4.1"
-            arch: powerpc64
-          - release: "6.4.1"
-            arch: sparc64
-          - release: "6.4.1"
-            arch: ppc64le
-          - release: "6.4.1"
-            arch: s390x
-          - release: "6.4.1"
-            arch: i386
-          - release: "6.4.1"
-            arch: loongarch64
-          - release: "6.4.1"
-            arch: armv7
-          - release: "6.4.2"
-            arch: aarch64
-          - release: "6.4.2"
-            arch: riscv64
-          - release: "6.4.2"
-            arch: powerpc64
-          - release: "6.4.2"
-            arch: sparc64
-          - release: "6.4.2"
-            arch: ppc64le
-          - release: "6.4.2"
-            arch: s390x
-          - release: "6.4.2"
-            arch: i386
-          - release: "6.4.2"
-            arch: loongarch64
-          - release: "6.4.2"
+          - release: "26.7"
             arch: armv7
           - release: ""
             arch: aarch64
@@ -546,7 +442,7 @@ jobs:
 
 
     runs-on: ${{ matrix.runs }}
-    name: scp DragonflyBSD
+    name: scp OPNsense
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
@@ -555,16 +451,16 @@ jobs:
     steps:
     - uses: actions/checkout@v7
 #    - name: Creating Web console
-#      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') }}
+#      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') }}
 #      uses: vmactions/cf-tunnel@v0
 #      id: tunnel
 #      with:
 #        protocol: http
 #        port: 8000
-    - name: Test in DragonflyBSD
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') }}
+    - name: Test in OPNsense
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         envs: 'DEBUG MYTOKEN MYTOKEN2'
         prepare: |
@@ -596,10 +492,12 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
 
+
     - name: Test files
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') }}
       env:
         VM_USER: ""
       run: |
@@ -615,17 +513,17 @@ jobs:
     # get no GITHUB_WORKSPACE (SendEnv excluded), so the custom shell does not
     # run in the synced work tree.
     - name: Prepare custom shell sync test file on host
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') && !contains(github.repository, 'haiku') && !contains(github.repository, 'blissos') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') && !contains(github.repository, 'haiku') && !contains(github.repository, 'blissos') }}
       run: |
         echo "host-data" > hostfile.txt
     - name: Test custom shell file sync
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') && !contains(github.repository, 'haiku') && !contains(github.repository, 'blissos') }}
-      shell: dragonflybsd {0}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') && !contains(github.repository, 'haiku') && !contains(github.repository, 'blissos') }}
+      shell: opnsense {0}
       run: |
         [ "$(cat hostfile.txt)" = "host-data" ]
         echo "vm-data" > vmfile.txt
     - name: Verify custom shell copyback on host
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') && !contains(github.repository, 'haiku') && !contains(github.repository, 'blissos') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'scp') && !contains(github.repository, 'haiku') && !contains(github.repository, 'blissos') }}
       run: |
         set -e
         [ "$(cat vmfile.txt)" = "vm-data" ]
@@ -671,9 +569,9 @@ jobs:
     # Repo-level gate, same expression the steps below already use. Without it
     # the guests whose builder does not list tar still spawn this job and green
     # it with every step skipped.
-    if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'tar') }}
+    if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'tar') }}
     runs-on: ubuntu-24.04
-    name: tar DragonflyBSD
+    name: tar OPNsense
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
@@ -691,10 +589,10 @@ jobs:
           conf
           .github
         sparse-checkout-cone-mode: true
-    - name: Test in DragonflyBSD
-      if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'tar') }}
+    - name: Test in OPNsense
+      if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'tar') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         mem: 4096
         debug: true
@@ -702,7 +600,7 @@ jobs:
         run: |
 
     - name: Verify tar copyback on host
-      if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'tar') }}
+      if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'tar') }}
       run: |
         set -e
         ls -lah "$HOME/work"
@@ -743,9 +641,9 @@ jobs:
   test9p:
     # Repo-level gate -- see testtar. Only the 9p guests have this transport,
     # so on every other repo this job was a green do-nothing.
-    if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', '9p') }}
+    if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', '9p') }}
     runs-on: ubuntu-24.04
-    name: 9p DragonflyBSD
+    name: 9p OPNsense
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
@@ -758,10 +656,10 @@ jobs:
           conf
           .github
         sparse-checkout-cone-mode: true
-    - name: Test in DragonflyBSD
-      if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', '9p') }}
+    - name: Test in OPNsense
+      if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', '9p') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         mem: 4096
         debug: true
@@ -769,7 +667,7 @@ jobs:
         run: |
 
     - name: Verify 9P share on host
-      if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', '9p') }}
+      if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', '9p') }}
       run: |
         set -e
         ls -lah "$HOME/work"
@@ -803,11 +701,11 @@ jobs:
   # testcustomshell both exercise the default sync (rsync), so they share the
   # rsync exclude file.
   test:
-    if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'rsync') }}
+    if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'rsync') }}
     strategy:
       fail-fast: false
       matrix:
-        release: [ "6.4.0", "6.4.1","6.4.2"
+        release: [ "26.7"
 , ""]
         arch: [ "aarch64", "", "riscv64", "powerpc64", "sparc64", "ppc64le", "s390x", "i386", "loongarch64", "armv7"]
         runs: [ "ubuntu-24.04", "ubuntu-24.04-arm"]
@@ -832,59 +730,23 @@ jobs:
           - runs: "ubuntu-24.04-arm"
             arch: "armv7"
           # Manual matrix excludes only; combos with no conf are auto-excluded.
-          - release: "6.4.0"
+          - release: "26.7"
             arch: aarch64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: riscv64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: powerpc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: sparc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: ppc64le
-          - release: "6.4.0"
+          - release: "26.7"
             arch: s390x
-          - release: "6.4.0"
+          - release: "26.7"
             arch: i386
-          - release: "6.4.0"
+          - release: "26.7"
             arch: loongarch64
-          - release: "6.4.0"
-            arch: armv7
-          - release: "6.4.1"
-            arch: aarch64
-          - release: "6.4.1"
-            arch: riscv64
-          - release: "6.4.1"
-            arch: powerpc64
-          - release: "6.4.1"
-            arch: sparc64
-          - release: "6.4.1"
-            arch: ppc64le
-          - release: "6.4.1"
-            arch: s390x
-          - release: "6.4.1"
-            arch: i386
-          - release: "6.4.1"
-            arch: loongarch64
-          - release: "6.4.1"
-            arch: armv7
-          - release: "6.4.2"
-            arch: aarch64
-          - release: "6.4.2"
-            arch: riscv64
-          - release: "6.4.2"
-            arch: powerpc64
-          - release: "6.4.2"
-            arch: sparc64
-          - release: "6.4.2"
-            arch: ppc64le
-          - release: "6.4.2"
-            arch: s390x
-          - release: "6.4.2"
-            arch: i386
-          - release: "6.4.2"
-            arch: loongarch64
-          - release: "6.4.2"
+          - release: "26.7"
             arch: armv7
           - release: ""
             arch: aarch64
@@ -908,17 +770,17 @@ jobs:
 
 
     runs-on: ${{ matrix.runs }}
-    name: rsync default DragonflyBSD
+    name: rsync default OPNsense
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
     - uses: actions/checkout@v7
-    - name: Test in DragonflyBSD
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
+    - name: Test in OPNsense
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         envs: 'MYTOKEN MYTOKEN2'
         prepare: |
@@ -942,9 +804,11 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
+
     - name: Test NAT
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
       env:
         VM_USER: ""
       run: |
@@ -954,8 +818,8 @@ jobs:
         ssh -v  -p 20022 ${VM_USER:-root}@localhost  "uname -a;whoami;pwd"
 
     - name: Test custom shell
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
-      shell: dragonflybsd {0}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
+      shell: opnsense {0}
       run: |
         pwd
           pwd
@@ -963,7 +827,9 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
+
     - name: Collect VM debug artifacts
       if: failure()
       run: |
@@ -994,11 +860,11 @@ jobs:
 
   # Two-level sync gating -- see the comment above testsshfs.
   testcustomshell:
-    if: ${{ contains('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'rsync') }}
+    if: ${{ contains('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}', 'rsync') }}
     strategy:
       fail-fast: false
       matrix:
-        release: [ "6.4.0", "6.4.1","6.4.2"
+        release: [ "26.7"
 , ""]
         arch: [ "aarch64", "", "riscv64", "powerpc64", "sparc64", "ppc64le", "s390x", "i386", "loongarch64", "armv7"]
         runs: [ "ubuntu-24.04", "ubuntu-24.04-arm"]
@@ -1022,59 +888,23 @@ jobs:
           - runs: "ubuntu-24.04-arm"
             arch: "armv7"
           # Manual matrix excludes only; combos with no conf are auto-excluded.
-          - release: "6.4.0"
+          - release: "26.7"
             arch: aarch64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: riscv64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: powerpc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: sparc64
-          - release: "6.4.0"
+          - release: "26.7"
             arch: ppc64le
-          - release: "6.4.0"
+          - release: "26.7"
             arch: s390x
-          - release: "6.4.0"
+          - release: "26.7"
             arch: i386
-          - release: "6.4.0"
+          - release: "26.7"
             arch: loongarch64
-          - release: "6.4.0"
-            arch: armv7
-          - release: "6.4.1"
-            arch: aarch64
-          - release: "6.4.1"
-            arch: riscv64
-          - release: "6.4.1"
-            arch: powerpc64
-          - release: "6.4.1"
-            arch: sparc64
-          - release: "6.4.1"
-            arch: ppc64le
-          - release: "6.4.1"
-            arch: s390x
-          - release: "6.4.1"
-            arch: i386
-          - release: "6.4.1"
-            arch: loongarch64
-          - release: "6.4.1"
-            arch: armv7
-          - release: "6.4.2"
-            arch: aarch64
-          - release: "6.4.2"
-            arch: riscv64
-          - release: "6.4.2"
-            arch: powerpc64
-          - release: "6.4.2"
-            arch: sparc64
-          - release: "6.4.2"
-            arch: ppc64le
-          - release: "6.4.2"
-            arch: s390x
-          - release: "6.4.2"
-            arch: i386
-          - release: "6.4.2"
-            arch: loongarch64
-          - release: "6.4.2"
+          - release: "26.7"
             arch: armv7
           - release: ""
             arch: aarch64
@@ -1098,17 +928,17 @@ jobs:
 
 
     runs-on: ${{ matrix.runs }}
-    name: customshell DragonflyBSD
+    name: customshell OPNsense
     env:
       MYTOKEN : ${{ secrets.MYTOKEN }}
       MYTOKEN2: "value2"
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
     - uses: actions/checkout@v7
-    - name: Test in DragonflyBSD
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
+    - name: Test in OPNsense
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         envs: 'MYTOKEN MYTOKEN2'
         prepare: |
@@ -1132,9 +962,11 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
+
     - name: Test NAT
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
       env:
         VM_USER: ""
       run: |
@@ -1144,7 +976,7 @@ jobs:
         ssh -v  -p 20022 ${VM_USER:-root}@localhost  "uname -a;whoami;pwd"
 
     - name: Test custom shell
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') }}
       shell: vmsh {0}
       run: |
         pwd
@@ -1153,24 +985,26 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
+
     # File round-trip through the custom shell with sync rsync: a file created
     # on the host must be visible inside the VM, and a file created in the VM
     # must come back to the host (vmactions/freebsd-vm#128). Skipped on Haiku:
     # its guest gets no GITHUB_WORKSPACE (SendEnv excluded), so the custom
     # shell does not run in the synced work tree.
     - name: Prepare custom shell sync test file on host
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') && !contains(github.repository, 'haiku') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') && !contains(github.repository, 'haiku') }}
       run: |
         echo "host-data" > hostfile.txt
     - name: Test custom shell file sync
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') && !contains(github.repository, 'haiku') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') && !contains(github.repository, 'haiku') }}
       shell: vmsh {0}
       run: |
         [ "$(cat hostfile.txt)" = "host-data" ]
         echo "vm-data" > vmfile.txt
     - name: Verify custom shell copyback on host
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') && !contains(github.repository, 'haiku') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')[matrix.arch == '' && 'x86_64' || matrix.arch], 'rsync') && !contains(github.repository, 'haiku') }}
       run: |
         set -e
         [ "$(cat vmfile.txt)" = "vm-data" ]
@@ -1219,15 +1053,15 @@ jobs:
     strategy:
       fail-fast: false
     runs-on: ubuntu-24.04
-    name: cache-after-prepare seed DragonflyBSD
+    name: cache-after-prepare seed OPNsense
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
     - uses: actions/checkout@v7
-    - name: Test in DragonflyBSD
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')['x86_64'], 'rsync') }}
+    - name: Test in OPNsense
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')['x86_64'], 'rsync') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         mem: 4096
         debug: true
@@ -1244,7 +1078,9 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
+
     - name: Collect VM debug artifacts
       if: failure()
       run: |
@@ -1277,17 +1113,17 @@ jobs:
     strategy:
       fail-fast: false
     runs-on: ubuntu-24.04
-    name: cache-after-prepare hit DragonflyBSD
+    name: cache-after-prepare hit OPNsense
     env:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
     steps:
     - uses: actions/checkout@v7
     # The inputs (notably 'prepare' and the sync method) must be byte-identical
     # to the seed job above: the prepared-image cache key hashes them.
-    - name: Test in DragonflyBSD
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')['x86_64'], 'rsync') }}
+    - name: Test in OPNsense
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')['x86_64'], 'rsync') }}
       id: test
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         mem: 4096
         debug: true
@@ -1304,14 +1140,16 @@ jobs:
           whoami
           env
           uname -a
+          nproc
           echo "OK"
+
     # Hard assertion: this job runs right after the seed job with no
     # concurrent cache saves in this run (see the needs chain), so the
     # prepared entry must still be present. A miss here means either a real
     # hit-path regression or cross-run cache churn from another ref -- both
     # worth a red job.
     - name: Verify prepare was skipped
-      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')['x86_64'], 'rsync') }}
+      if: ${{ contains(fromJSON('{"x86_64":["rsync","scp","nfs","tar"],"aarch64":[],"riscv64":[],"powerpc64":[],"sparc64":[],"ppc64le":[],"s390x":[],"i386":[],"loongarch64":[],"armv7":[]}')['x86_64'], 'rsync') }}
       run: |
         set -e
         echo "cache-after-prepare-hit=${{ steps.test.outputs.cache-after-prepare-hit }}"
@@ -1348,7 +1186,7 @@ jobs:
     strategy:
       fail-fast: false
     runs-on: ubuntu-24.04
-    name: test default error DragonflyBSD
+    name: test default error OPNsense
     steps:
     # Sparse, like testtar/test9p: this job runs with the repo's DEFAULT sync,
     # which on the agent guests is the tar or 9P channel, and it would
@@ -1360,10 +1198,10 @@ jobs:
           conf
           .github
         sparse-checkout-cone-mode: true
-    - name: Test in DragonflyBSD
+    - name: Test in OPNsense
       id: testerr
       continue-on-error: true
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         debug: true
         # A command that EXISTS and fails, rather than `false` or a made-up
@@ -1393,7 +1231,7 @@ jobs:
     strategy:
       fail-fast: false
     runs-on: ubuntu-24.04
-    name: test default success DragonflyBSD
+    name: test default success OPNsense
     steps:
     # Sparse, same reason as testerr above -- and this is the job the full
     # payload actually broke: the ReactOS push spent 12 minutes on those
@@ -1406,10 +1244,10 @@ jobs:
           conf
           .github
         sparse-checkout-cone-mode: true
-    - name: Test in DragonflyBSD
+    - name: Test in OPNsense
       id: testpass
       continue-on-error: true
-      uses: vmactions/dragonflybsd-vm@9a978095822d0c04291ed21ee536ae6d01ea49a2
+      uses: vmactions/opnsense-vm@a2649b4b7dc8d81ca3660f7617febfe9ddebd308
       with:
         debug: true
         # No `true` and no double quotes: this body runs on every guest, and
