@@ -1,6 +1,6 @@
 {
   "name": "vmactions-OPNsense",
-  "version": "",
+  "version": "1.0.0",
   "description": "GitHub actions for OPNsense",
   "type": "module",
   "main": "index.js",
