@@ -1,4 +1,2 @@
           - release: "26.7"
             arch: ""
-          - release: ""
-            arch: ""
